@@ -9,13 +9,15 @@ const styles = StyleSheet.create({
         borderRadius:10,
         borderWidth: 1.5,
         width: '48%',
-        margin: '1%'
+        margin: '1%',
+        color: 'black'
     },
     txt: {
         padding: 30,
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 45,
+        color: 'black'
       
     },
     textLabel: {
@@ -28,6 +30,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 25,
+        color: 'black'
     },
     textInfo: {
         alignItems:'center',
