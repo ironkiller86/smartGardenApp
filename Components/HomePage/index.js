@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component} from 'react';
 import {
     Text,
     View,
@@ -6,7 +6,8 @@ import {
     ImageBackground,
     SafeAreaView,
     ScrollView,
-    StatusBar
+    StatusBar,
+   
 } from 'react-native';
 
 import { MyButton } from '../Box'
@@ -14,12 +15,14 @@ import { MyButton } from '../Box'
 
 import BoxContainer from '../BoxContainer';
 
+
 class HomePage extends Component {
 
 
     render() {
         return (
-            <ImageBackground source={require('../../image/image2.jpg')} style={{ width: '100%', height: '100%' }}>
+    
+          
                 <SafeAreaView>
                     <ScrollView>
                         <StatusBar backgroundColor="gray" barStyle="light-content" showHideTransition='slide' />
@@ -28,7 +31,8 @@ class HomePage extends Component {
                         <MyButton value={'Ferma Irrigazione'} />
                     </ScrollView>
                 </SafeAreaView>
-            </ImageBackground>
+        
+           
         )
     }
 }

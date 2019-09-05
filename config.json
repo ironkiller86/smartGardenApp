@@ -1,0 +1,7 @@
+{
+  "imageBackground" : {
+    "home" :"./image/image2.jpg",
+    "setting":"./image/image3.jpg"
+  }
+  
+}

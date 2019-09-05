@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, ImageBackground, TouchableOpacity,ScrollView } from 'react-native';
+import { Text, View, StyleSheet, ImageBackground, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 /**
  * 
@@ -79,7 +79,6 @@ export const Box = (props) => {
  */
 export const Container = (props) => {
     return (
-        <ImageBackground source={require('../../image/image2.jpg')} style={{ width: '100%', height: '100%' }}>
             <View style={{
                 flex: 1,
                 flexDirection: 'row',
@@ -87,7 +86,8 @@ export const Container = (props) => {
             }}>
                 {props.children}
             </View >
-        </ImageBackground>
+      
+   
     )
 }
 /**
@@ -121,3 +121,29 @@ export const MyButton = (props) => {
             </TouchableOpacity>
     )
 }
+
+/**
+ * 
+ */
+export const Spinner = (props)=> {
+    return(
+        <View style={[styles2.container, styles2.horizontal]}>
+        <ActivityIndicator /* animating={props.hide}*/ size='large' color="#0000ff" />
+        </View>
+    )
+}
+/**
+ * 
+ */
+const styles2 = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center'
+    },
+    horizontal: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      padding: 10
+    }
+  })
+  
