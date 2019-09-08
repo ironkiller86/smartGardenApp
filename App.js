@@ -27,7 +27,7 @@ export default class App extends Component {
 
 
 startApp = () => {
-  console.log('startApp')
+  
  // this.setState({flag:true})
   this.setState({loaded:true})
 
@@ -38,13 +38,13 @@ startApp = () => {
 
 
   componentDidMount() {
-    console.log('componentDidMount')
+  
   
     
   }
 
   render() {
-    console.log('stato ' + this.state.loaded)
+  //  console.log('stato ' + this.state.loaded)
     return (
       <React.Fragment>
         <ImageBackground  onLoadEnd={this.startApp} source={require('./image/image2.jpg')} style={{ width: '100%', height: '100%' }}>
