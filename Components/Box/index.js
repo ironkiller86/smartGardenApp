@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
 export const Box = (props) => {
     return (
         <View style={styles.box}>
-            <Text style={styles.textLabel}>{props.value}</Text>
-            <Text style={styles.txt}>55</Text>
+            <Text style={styles.textLabel}>{props.label}</Text>
+            <Text style={styles.txt}>{props.data}</Text>
         </View>
     )
 }
@@ -101,8 +101,8 @@ export const InformationField = (props) => {
               <Text style={styles.textInfo}>{props.value}</Text>
            </View>
            <View style={styles.txt}>
-              <Text style={styles.textInfo}>testo</Text>
-              <Text style={styles.textInfo}>testo</Text>
+              <Text style={styles.textInfo}>{props.info}</Text>
+              <Text style={styles.textInfo}></Text>
             </View>
         </View>
     )
@@ -112,10 +112,11 @@ export const InformationField = (props) => {
  * @param {*} props 
  */
 export const MyButton = (props) => {
+    console.log('dentro button')
     return (
             <TouchableOpacity
                 style={styles.Mybutton}
-                onPress={() => alert('premuto')}
+                onPress={props.action(true)}
             >
                 <Text style={styles.txtBtn}>{props.value}</Text>
             </TouchableOpacity>

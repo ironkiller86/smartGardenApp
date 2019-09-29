@@ -1,5 +1,9 @@
 import React, { Component } from 'react'
+import { bytesToString } from 'convert-string';
+import { Button } from 'react-native'
 import { stringToBytes } from 'convert-string';
+import {withContext} from '../../Components/Context/consumer'
+
 import {
     Text,
     View,
@@ -12,13 +16,13 @@ import {
     Platform,
     PermissionsAndroid,
     NativeEventEmitter,
-    NativeModules, Switch
+    NativeModules, Switch,
 } from 'react-native';
 /**
  * 
  */
 import BleManager from 'react-native-ble-manager';
-const data = stringToBytes('b');
+const data = stringToBytes('i');
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -55,9 +59,10 @@ const styles = StyleSheet.create({
 
 
 class SettingBluetooth extends Component {
-    constructor() {
-        super()
-
+    constructor(props) {
+        console.log('constructor Setting bluetooth')
+        super(props)
+       
         this.state = {
             scanning: false,
             peripherals: new Map(),
@@ -68,6 +73,7 @@ class SettingBluetooth extends Component {
 
 
     componentDidMount() {
+        console.log('componentDidMount Setting bluetooth')
         AppState.addEventListener('change', this.handleAppStateChange)
         /**
          *
@@ -107,11 +113,41 @@ class SettingBluetooth extends Component {
             peripherals.set(peripheral.id, peripheral);
             this.setState({ peripherals });
         }
+
+       this.props.context.setData([])
         console.log('Disconnected from ' + data.peripheral);
     }
 
     handleUpdateValueForCharacteristic = (data) => {
-        console.log('Received data from ' + data.peripheral + ' characteristic ' + data.characteristic, data.value);
+        this.bluetoothHandler(data)
+    }
+    /**
+     * 
+     */
+    bluetoothHandler = (data) => {
+        console.log('Received data from ' + data.peripheral + ' characteristic '
+            + data.characteristic + ' ' + data.value);
+        const rowData = data.value
+        let dataObject = {}
+        if (rowData) {
+            dataObject.temp = rowData[0]
+            dataObject.groundSoilMost = rowData[1]
+            dataObject.atmSoilMost = rowData[2]
+            dataObject.isDay = ((rowData[3] === 48) ? 'DAY' : 'NIGHT')
+            dataObject.info = this.handlerInfo(rowData[4])
+        }
+        console.log(dataObject)
+        this.props.context.setData(dataObject)
+    }
+    
+    handlerInfo = (param = 0) => {
+        switch(param) {
+            case 0:
+                return 'SmartGarden non è connesso con Arduino'
+
+            case 1:
+               return 'SmartGarden Online'    
+        }
     }
 
     handleStopScan = () => {
@@ -129,10 +165,13 @@ class SettingBluetooth extends Component {
     }
 
 
+  
+
     /**
      * 
      */
     componentWillUnmount() {
+        console.log('componentWillUnmount Setting bluetooth')
         this.handlerDiscover.remove();
         this.handlerStop.remove();
         this.handlerDisconnect.remove();
@@ -170,7 +209,10 @@ class SettingBluetooth extends Component {
         });
     }
 
-
+  componentWillReceiveProps() {
+    console.log(' componentWillReceiveProps Setting bluetooth')
+      console.log('valore in arrivo ' + this.props.context.getIrrigation())
+  }
 
     /**
      *  sente l' app è eseguita in background o meno,
@@ -205,6 +247,26 @@ class SettingBluetooth extends Component {
         }
     }
 
+
+
+    writeData = () => {
+        console.log('Scrivo a arduino')
+        BleManager.write('90:E2:02:8F:40:24', 'FFE0', 'FFE1', data)
+            .then(() => {
+                // Success code
+                console.log('Write: ' + data);
+            })
+            .catch((error) => {
+                // Failure code
+                console.log(error);
+            });
+
+
+
+
+    }
+
+
     connect = (peripheral) => {
         if (peripheral) {
             if (peripheral.connected) {
@@ -213,31 +275,35 @@ class SettingBluetooth extends Component {
                 BleManager.connect(peripheral.id).then(() => {
                     let peripherals = this.state.peripherals
                     let p = peripherals.get(peripheral.id)
-                   // console.log(peripheral)
+                    // console.log(peripheral)
                     if (p) {
                         p.connected = true;
                         peripherals.set(peripheral.id, p)
                         this.setState({ peripherals })
                     }
-                   // console.log('Connected to ' + peripheral.id)
 
                     BleManager.retrieveServices(peripheral.id)
-                        .then((peripheralData) => {
+                        .then((peripheralInfo) => {
                             // Success code
-                            console.log('Peripheral DAta:', peripheralData);
+                            console.log('Peripheral info:', peripheralInfo);
+
+                            BleManager.startNotification(peripheral.id, 'FFE0', 'FFE1')
+                                .then(() => {
+                                    // Success code
+                                    console.log('Notification started');
+                                })
+                                .catch((error) => {
+                                    // Failure code
+                                    console.log(error);
+                                });
+
+
+
+
+
+
+
                         });
-
-
-                        BleManager.write(peripheral.id, 'ffe0', '2a00', data)
-                        .then(() => {
-                          console.log('donato')
-                          console.log('Write: ' + data);
-                        })
-                        .catch((error) => {
-                          // Failure code
-                          console.log(error);
-                        });
-
 
                 })
 
@@ -254,11 +320,16 @@ class SettingBluetooth extends Component {
         const dataSource = ds.cloneWithRows(list);
         return (
             <React.Fragment>
-
+           
                 <View style={styles.container}>
                     <View style={styles.switch}>
                         <Text>Active bluetooth</Text>
                         <Switch value={this.state.stateSwitch} onValueChange={this.activeBluetooth} />
+                        <Button
+                            title="Press me"
+                            color="#f194ff"
+                            onPress={this.writeData}
+                        />
                     </View>
                     <TouchableHighlight style={{ marginTop: 40, margin: 20, padding: 20, backgroundColor: '#ccc' }} onPress={() => this.startScan()}>
                         <Text>Scan Bluetooth ({this.state.scanning ? 'on' : 'off'})</Text>
@@ -293,4 +364,4 @@ class SettingBluetooth extends Component {
         )
     }
 }
-export default SettingBluetooth
+export default withContext(SettingBluetooth)
