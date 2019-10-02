@@ -12,8 +12,11 @@ import {Platform, StyleSheet, Text, View,ImageBackground,Image} from 'react-nati
 import { Spinner } from './Components/Box'
 import Provider from './Components/Context/index'
 import Navigator from './Components/TabNavigator'
+import HomePage from './Components/HomePage';
+import BoxContainer from './Components/BoxContainer'
 
 
+  
 
 
  class App extends Component {
@@ -39,7 +42,7 @@ startApp = () => {
 
 
   componentDidMount() {
-  
+    
   
     
   }
@@ -47,13 +50,7 @@ startApp = () => {
   render() {
    
     return (
-      <Provider>
-        <ImageBackground  onLoadEnd={this.startApp} source={require('./image/image2.jpg')} style={{ width: '100%', height: '100%' }}>
-          {
-            (this.state.loaded) ? <Navigator test={'ciao'}/> :<Spinner/>
-          }
-        </ImageBackground> 
-    </Provider>
+      <BoxContainer/>
     )
   }
 }

@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { withContext } from '../../Components/Context/consumer'
 import SettingBluetooth from '../../Components/SettingBluetooth'
+
+import Bluetooth from '../../Components/Bluetooth';
+let ble = new Bluetooth()
+  
+
+
 import {
     Text,
     View,
@@ -9,7 +15,8 @@ import {
     SafeAreaView,
     ScrollView,
     StatusBar,
-    TouchableOpacity
+    TouchableOpacity,
+    Button
 
 } from 'react-native';
 
@@ -52,36 +59,46 @@ class HomePage extends Component {
         this.irrigation= this.props.context
     }
 
-    hadlerClick = () => {
+   /* hadlerClick = () => {
         this.isClicked = !this.isClicked
         this.setState({ isClick: this.isClicked})
        
       
+    }*/
+
+
+    connect = () => {
+        ble.connect()
     }
 
     componentDidMount() {
-        this.irrigation.setIrrigation(this.state.isClick)
+      //  this.irrigation.setIrrigation(this.state.isClick)
         
     }
 
 
     render() {
         console.log('render Home PAge')
-        console.log(this.state.isClick)
+      //  console.log(this.state.isClick)
      
         return (
             <>
                 <SafeAreaView>
                     <ScrollView>
                         <StatusBar backgroundColor="gray" barStyle="light-content" showHideTransition='slide' />
-                        <BoxContainer />
+                        <BoxContainer data={ble.dataObject} />
                         {/*          <MyButton value={'Avvia Irrigazione'} action={this.hadlerClick}/> */}
                         <TouchableOpacity
                             style={styles.Mybutton}
-                            onPress={this.hadlerClick}
+                            onPress={ble.startScan}
                         >
                             <Text style={styles.txtBtn}>premi</Text>
                         </TouchableOpacity>
+                        <Button
+                            title="Press me"
+                            color="#f194ff"
+                            onPress={ble.writeData}
+                        />
 
                     </ScrollView>
                 </SafeAreaView>

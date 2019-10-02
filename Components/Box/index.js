@@ -10,14 +10,15 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         width: '48%',
         margin: '1%',
-        color: 'black'
+        color: 'white',
+        backgroundColor:'black'
     },
     txt: {
         padding: 30,
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 45,
-        color: 'black'
+        color: 'white'
       
     },
     textLabel: {
@@ -30,21 +31,22 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 25,
-        color: 'black'
+        color: 'green'
     },
     textInfo: {
         alignItems:'center',
         textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
-        color: 'black'
+        color: 'green'
     },
     boxField: {
         flex: 1,
         borderWidth: 1.5,
         borderRadius:10,
         fontSize: 45,
-        margin: '1%'
+        margin: '1%',
+        backgroundColor:'black'
     },
     Mybutton: {
         marginTop:10,
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
         alignItems:'center',
         textAlign: 'center',
         fontSize: 25,
-        color: 'black'
+        color: 'white'
     }
 });
 /**

@@ -260,10 +260,6 @@ class SettingBluetooth extends Component {
                 // Failure code
                 console.log(error);
             });
-
-
-
-
     }
 
 
@@ -296,17 +292,8 @@ class SettingBluetooth extends Component {
                                     // Failure code
                                     console.log(error);
                                 });
-
-
-
-
-
-
-
                         });
-
                 })
-
             }
         }
     }
