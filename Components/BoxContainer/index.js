@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Box, InformationField, Container } from '../Box'
-
+import { stringToBytes } from 'convert-string';
 import {
     Text, View, StyleSheet,
     SafeAreaView,
@@ -11,9 +11,9 @@ import {
 
 } from 'react-native';
 
-import { withContext } from '../../Components/Context/consumer'
 import Bluetooth from './../Bluetooth/index';
 import { Spinner } from './../Box/index';
+const timer = require('react-native-timer');
 const styles = StyleSheet.create({
     main: {
         flex: 1,
@@ -77,43 +77,83 @@ class BoxContainer extends Component {
             status: this.status,
             sensorData: []
         }
+        this.getInfo = stringToBytes('i')
+        this.activeIrr = stringToBytes('a')
+        this.stopIrrigation = stringToBytes('s')
         ble.startSession()
-        ble.enableBluetooth()
-
-
-
     }
+
+  
 
     parseObject = (data) => {
         let dataArray = []
-        let objectData = data 
+        let objectData = data
         Object.keys(objectData).map((res) => {
             dataArray.push(objectData[res])
         })
-        // console.log(dataArray)
         this.setState({ sensorData: dataArray })
     }
 
 
-    componentDidMount() {
-        ble.connecting().then((res) => {
-            console.log('eccolo ' + res)
+
+
+    sendData = (action=this.getInfo) => {
+        if(action ==='a') {
+            alert('Irrigazione Attivata')
+        }
+        ble.sendData(action).then((res) => {
+            console.log('da box ' + JSON.stringify(res))
+            this.parseObject(res)
+           
+        }).catch(err=>{
+            console.log('boxContainer catch sendData ' + err)
+            this.setState({isConnected:false,
+                           status:false
+            })
+        })
+    }
+
+    connecting = () => {
+        console.log('BoxContainer connetting ')
+        return ble.myConnecting().then((res) => {
             this.setState({ isConnected: res })
-            if (this.state.isConnected) {
+          if (this.state.isConnected) {
                 ble.startNot().then(res => {
                     console.log('notification res ' + res)
-                    ble.writeData().then((res) => {
-                        console.log('da box ' + JSON.stringify(res))
-                        this.parseObject(res)
-
-                    })
-
+                    this.sendData()
                 })
+            } else {
+                alert('SmartGarden not found!')
             }
+        }).catch(err=>{
+            console.log('boxContainer  connecting catturata eccezzione ' + err)
         })
-
-
     }
+
+
+    
+
+
+    componentDidMount() {
+        console.log('componentDidMount')
+       if (!this.isConnected) {
+
+         this.connecting().then(() => {
+                if (this.state.isConnected) {
+                    timer.setInterval(this, 'func', this.sendData, 5000);
+                }
+            }).catch(err => {
+                console.log(err)
+            })
+        }
+    }
+
+    componentWillUnmount() {
+        console.log('componentWillUnmount')
+        ble.disconnect()
+    } 
+
+
     render() {
         return (
 
@@ -127,23 +167,24 @@ class BoxContainer extends Component {
                         <View style={styles.bxDashboard}>
                             <Button style={styles.btn}
 
-                                title="Press me"
+                                title="reconnect"
                                 color='gray'
-                                onPress={/*ble.writeData*/ () => alert('ciao')}
+                                onPress={this.connecting}
+                                
                             />
                         </View>
                         <View style={styles.bxDashboard}>
                             <Button
-                                title="Press me"
+                                title="Active Irrig"
                                 color='gray'
-                                onPress={/*ble.writeData*/ () => alert('ciao')}
+                                onPress={ ()=>this.sendData(this.activeIrr)}
                             />
                         </View>
                         <View style={styles.bxDashboard}>
                             <Button
-                                title="Press me"
+                                title="Stop Irrig"
                                 color='gray'
-                                onPress={/*ble.writeData*/ () => alert('ciao')}
+                                onPress={()=>this.sendData(this.stopIrrigation)}
                             />
                         </View>
                         <View style={styles.bxDashboard}>
@@ -172,7 +213,7 @@ class BoxContainer extends Component {
                             <Box label={textLabel.two} data={(this.state.sensorData[1]) || 0} />
                             <Box label={textLabel.three} data={(this.state.sensorData[2]) || 0} />
                             <Box label={textLabel.four} data={(this.state.sensorData[3]) || '-'} />
-                            <InformationField value={textLabel.five} info={(this.state.sensorData[4]) || 'Off Line'} />
+                            <InformationField value={textLabel.five} info={(this.state.isConnected)?this.state.sensorData[4] : 'Off Line'} />
 
                         </Container>
                     </View>
@@ -189,5 +230,5 @@ class BoxContainer extends Component {
         )
     }
 }
-export default withContext(BoxContainer)
+export default BoxContainer
 

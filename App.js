@@ -8,11 +8,9 @@
 import config from './config.json'
 import React, { Component } from 'react';
 import {Platform, StyleSheet, Text, View,ImageBackground,Image} from 'react-native';
-//import TabNavigator from './Components/TabNavigator'
+
 import { Spinner } from './Components/Box'
-import Provider from './Components/Context/index'
-import Navigator from './Components/TabNavigator'
-import HomePage from './Components/HomePage';
+
 import BoxContainer from './Components/BoxContainer'
 
 
@@ -32,7 +30,7 @@ import BoxContainer from './Components/BoxContainer'
 
 startApp = () => {
   
- // this.setState({flag:true})
+
   this.setState({loaded:true})
 
 }
@@ -43,14 +41,14 @@ startApp = () => {
 
   componentDidMount() {
     
-  
+ 
     
   }
 
   render() {
    
     return (
-      <BoxContainer/>
+      <BoxContainer />
     )
   }
 }
