@@ -31,7 +31,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 25,
-        color: 'green'
+        color: 'green',
+      
     },
     textInfo: {
         alignItems:'center',
@@ -46,7 +47,8 @@ const styles = StyleSheet.create({
         borderRadius:10,
         fontSize: 45,
         margin: '1%',
-        backgroundColor:'black'
+        backgroundColor:'black',
+      
     },
     Mybutton: {
         marginTop:10,
@@ -113,7 +115,7 @@ export const InformationField = (props) => {
  * 
  * @param {*} props 
  */
-export const MyButton = (props) => {
+/*export const MyButton = (props) => {
     console.log('dentro button')
     return (
             <TouchableOpacity
@@ -124,7 +126,7 @@ export const MyButton = (props) => {
             </TouchableOpacity>
     )
 }
-
+*/
 /**
  * 
  */

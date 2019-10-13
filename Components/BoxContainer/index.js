@@ -34,20 +34,26 @@ const styles = StyleSheet.create({
         margin: '1%',
         borderWidth: 1.5,
         justifyContent: "center",
-        backgroundColor: 'black'
+        backgroundColor: 'black',
+
+        //height:100
     },
     bxDashboard: {
         width: '25%',
-        margin: 3,
+        margin: 5,
+        padding: 2
+
 
     },
-    status: {
+    lightIndicator: {
         width: '25%',
         backgroundColor: 'red',
         borderRadius: 100,
         borderWidth: 1.5,
         position: "absolute",
-        padding: 5
+        padding: 5,
+        textAlign: 'center',
+        fontWeight: 'bold'
     },
     statusWrapper: {
         flex: 1,
@@ -55,37 +61,54 @@ const styles = StyleSheet.create({
     },
     statusOk: {
         backgroundColor: 'green',
+    },
+    btn: {
+        textAlign: 'right'
     }
 })
-
-
+/**
+ * 
+ */
 const textLabel = {
     one: 'Temp',
     two: 'Umid Terr',
     three: 'Umid Atm',
-    four: 'Press Atm',
+    four: 'Fase Giornata',
     five: 'App Information'
 }
+/**
+ * 
+ */
 const ble = new Bluetooth()
-
+/**
+ * 
+ */
 class BoxContainer extends Component {
     constructor(props) {
+        console.log('BoxContainer - constructor')
         super(props)
-
         this.state = {
             isConnected: false,
-            status: this.status,
-            sensorData: []
+            status: 'offline',//this.status,
+            sensorData: [],
+            irrigationState: false
         }
         this.getInfo = stringToBytes('i')
         this.activeIrr = stringToBytes('a')
         this.stopIrrigation = stringToBytes('s')
-        ble.startSession()
+        this.isBle = this.props.isBle
+        /**
+         * 
+         */
+        this.connecting()
     }
 
-  
 
+    /**
+     * 
+     */
     parseObject = (data) => {
+        console.log('BoxContainer - parseObject')
         let dataArray = []
         let objectData = data
         Object.keys(objectData).map((res) => {
@@ -93,119 +116,127 @@ class BoxContainer extends Component {
         })
         this.setState({ sensorData: dataArray })
     }
-
-
-
-
-    sendData = (action=this.getInfo) => {
-        if(action ==='a') {
-            alert('Irrigazione Attivata')
-        }
-        ble.sendData(action).then((res) => {
-            console.log('da box ' + JSON.stringify(res))
-            this.parseObject(res)
-           
-        }).catch(err=>{
-            console.log('boxContainer catch sendData ' + err)
-            this.setState({isConnected:false,
-                           status:false
+    /**
+     * 
+     */
+    sendData = (action = this.getInfo) => {
+        console.log('BoxContainer - sendData')
+        if (this.isBle) {
+            ble.sendData(action).then((res) => {
+                console.log('BoxContainer - sendData - da arduino arriva ' + JSON.stringify(res))
+                this.parseObject(res)
+            }).catch(err => {
+                console.log('BoxContainer - sendData catch ' + err)
+                this.setState({
+                    isConnected: false,
+                    status: 'offline'
+                })
             })
-        })
+        }
     }
-
+    /**
+     * 
+     */
     connecting = () => {
-        console.log('BoxContainer connetting ')
-        return ble.myConnecting().then((res) => {
-            this.setState({ isConnected: res })
-          if (this.state.isConnected) {
-                ble.startNot().then(res => {
-                    console.log('notification res ' + res)
+        console.log('BoxContainer - connetting ')
+        if (this.isBle) {
+            return ble.searchConnession().then((res) => {
+                this.setState({
+                    isConnected: res,
+                    status: 'online'
+                })
+                ble.startNot().then(() => {
+                    console.log('BoxContainer - connetting  - notification attivata')
+                    //  timer.setInterval(this, 'func', this.sendData, 20000);
                     this.sendData()
                 })
-            } else {
-                alert('SmartGarden not found!')
-            }
-        }).catch(err=>{
-            console.log('boxContainer  connecting catturata eccezzione ' + err)
-        })
+            }).catch(res => {
+                alert('connessione non riuscita')
+                console.log('BoxContainer - connetting - connessione non riuscita ' + res)
+            })
+
+        }
+
     }
-
-
-    
-
-
+    /**
+     * 
+     */
     componentDidMount() {
-        console.log('componentDidMount')
-       if (!this.isConnected) {
-
-         this.connecting().then(() => {
+        console.log('BoxContainer - componentDidMount')
+        if (this.isBle && !this.state.isConnected) {
+            this.connecting().then(() => {
                 if (this.state.isConnected) {
-                    timer.setInterval(this, 'func', this.sendData, 5000);
+                    timer.setInterval(this, 'func', this.sendData, 20000);
                 }
             }).catch(err => {
-                console.log(err)
+                console.log('BoxContainer - componentDidMount ' + err)
             })
         }
     }
+    /**
+     * 
+     */
+    handlerIrrigationState = () => {
+        console.log('BoxContainer - handlerIrrigationState')
+        if (!this.state.irrigationState) {
+            this.sendData(this.activeIrr)
+            this.setState({ irrigationState: true })
+        }
+        else {
+            this.sendData(this.stopIrrigation)
+            this.setState({ irrigationState: false })
+        }
+    }
 
+    /**
+     * 
+     */
     componentWillUnmount() {
-        console.log('componentWillUnmount')
-        ble.disconnect()
-    } 
+        console.log('BoxContainer - componentWillUnmount')
+        if (this.isBle) {
+            console.log('BoxContainer - componentWillUnmount - Disconnessione dal Arduino')
+            ble.disconnect()
+        }
+    }
 
-
+    /**
+     * 
+     */
     render() {
+        console.log('BoxContainer - render')
         return (
-
             <SafeAreaView style={{ backgroundColor: "gray" }}>
                 <StatusBar backgroundColor="gray" barStyle="light-content" showHideTransition='slide' />
                 <ScrollView >
-
-
-
                     <View style={styles.dashBoard}>
                         <View style={styles.bxDashboard}>
                             <Button style={styles.btn}
-
-                                title="reconnect"
-                                color='gray'
+                                disabled={this.state.isConnected}
+                                title="RCT"
+                                color={this.state.isConnected ? 'red' : 'green'}
                                 onPress={this.connecting}
-                                
                             />
                         </View>
                         <View style={styles.bxDashboard}>
                             <Button
-                                title="Active Irrig"
-                                color='gray'
-                                onPress={ ()=>this.sendData(this.activeIrr)}
+                                disabled={this.state.isConnected ? false : true}
+                                title={!this.state.irrigationState ? 'Start Irrig' : 'Stop Irrig'}
+                                color={!this.state.irrigationState ? 'green' : 'red'}
+                                onPress={this.handlerIrrigationState}
                             />
                         </View>
-                        <View style={styles.bxDashboard}>
-                            <Button
-                                title="Stop Irrig"
-                                color='gray'
-                                onPress={()=>this.sendData(this.stopIrrigation)}
-                            />
-                        </View>
-                        <View style={styles.bxDashboard}>
-                            <Button
 
-                                title="Press me"
-                                color='gray'
-                                onPress={/*ble.writeData*/ () => alert('ciao')}
-                            />
-                        </View>
                         <View style={styles.bxDashboard}>
                             <Button
-                                title="Press me"
-                                color='gray'
-                                onPress={/*ble.writeData*/ () => alert('ciao')}
+                                disabled={this.state.isConnected ? false : true}
+                                title="Update"
+                                color='blue'
+                                onPress={this.connecting}
                             />
                         </View>
                         <View style={styles.bxDashboard}>
 
                         </View>
-
                     </View>
                     <View style={styles.main}>
                         <Container>
@@ -213,17 +244,13 @@ class BoxContainer extends Component {
                             <Box label={textLabel.two} data={(this.state.sensorData[1]) || 0} />
                             <Box label={textLabel.three} data={(this.state.sensorData[2]) || 0} />
                             <Box label={textLabel.four} data={(this.state.sensorData[3]) || '-'} />
-                            <InformationField value={textLabel.five} info={(this.state.isConnected)?this.state.sensorData[4] : 'Off Line'} />
+                            <InformationField value={textLabel.five} info={(this.state.isConnected) ? this.state.sensorData[4] : 'Off Line'} />
 
                         </Container>
                     </View>
                     <View style={styles.statusWrapper}>
-                        <Text style={[styles.status, this.state.isConnected && styles.statusOk]}></Text>
-
+                        <Text style={[styles.lightIndicator, this.state.isConnected && styles.statusOk]}>{(this.isBle) ? 'BLE' : ''}</Text>
                     </View>
-
-
-
                 </ScrollView>
             </SafeAreaView>
 
